@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="resources/css/default.css"/>
+        <h:outputStylesheet name="resources/css/cssLayout.css"/>
+        <title>Cajero </title>
+        <ui:insert name="head" />
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+        </f:facet>
+    </h:head>
+
+    <h:body style="padding: 0px; border: 0px; margin: 0px;">
+
+        <div style="background: #2BB673; padding: 0px; text-align: center;padding: 10px;">
+            <p:outputLabel value="Cajero automático" style="font-size: 30px;color: #FFFFFF;font-weight: bold !important; "/>
+        </div>
+        <h:form id="form" style="margin: 20px;"> 
+
+            <div class="ui-g">
+                <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                    <p:outputLabel value="Retirar dinero en efectivo" style="font-size: 24px;color:  #636466;font-weight: bold !important"/><BR/>
+                </div>
+            </div>
+
+            <p:fragment rendered="#{denominacionesEfectivoController.view.listaEfectivoBO eq null}">
+                <p:card style="background: #ebebeb; margin-left: 50px; margin-right: 50px">
+                    <f:facet name="header">
+                        <div style="text-align: center; padding: 20px;">
+                            <p:outputLabel value="¿Cantidad a retirar? " style="font-size: 16px;color:  #636466;font-weight: bold !important"/>
+
+                            <p:inputNumber id="cantidad" value="#{denominacionesEfectivoController.view.cantidad}" required="true" decimalPlaces="2" decimalSeparator="." thousandSeparator="," emptyValue="zero"   maxlength="100" requiredMessage="Este campo es requerido"/>
+                            <p:message for="cantidad"/>
+                        </div>
+                    </f:facet>
+
+                    <f:facet name="footer">
+                        <div  style="padding:  20px;   align-items: center;display: flex; justify-content: center;">
+                            <p:commandButton value="Retirar"  action="#{denominacionesEfectivoController.cobrar()}" icon="pi pi-check" class="White ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only GreenButton ui-g-3 ui-md-3 ui-lg-3" update=":form"  />
+                        </div>
+                    </f:facet>
+                </p:card>
+            </p:fragment>
+
+            <p:fragment rendered="#{denominacionesEfectivoController.view.listaEfectivoBO != null}">
+                <p:card style="background: #ebebeb; margin-left: 50px; margin-right: 50px">
+                    <f:facet name="header">
+                        <div style="text-align: center; padding: 20px;">
+                            <p:repeat var="denominacion" value="#{denominacionesEfectivoController.view.listaEfectivoBO}" >
+                                <div class="ui-g-12">
+                                    <p:outputLabel value="#{denominacion.cantidad} #{denominacion.tipo} " style="font-size: 18px;color:  #636466;"/>
+                                    <p:outputLabel value=" con la denominación: " style="font-size: 18px;color:  #636466;"/>
+                                    <p:outputLabel value="#{denominacion.denominacion}" style="font-size: 18px;color:  #2BB673;font-weight: bold !important">
+                                        <f:convertNumber type="currency" maxFractionDigits="2" minFractionDigits="2" locale="es_MX"/>
+                                    </p:outputLabel>
+                                </div>
+                            </p:repeat>
+                            <div class="ui-g-12">
+                                <p:outputLabel value="Total de efectivo: " style="font-size: 24px;color: #000;font-weight: bold !important"/>
+                                <p:outputLabel value="#{denominacionesEfectivoController.view.montoTotal}" style="font-size: 24px;color:  #D20005;font-weight: bold !important">
+                                    <f:convertNumber type="currency" maxFractionDigits="2" minFractionDigits="2" locale="es_MX"/>
+                                </p:outputLabel>
+                            </div>
+                        </div>
+                    </f:facet>
+                    <f:facet name="footer">
+                        <div  style="padding:  20px;   align-items: center;display: flex; justify-content: center;">
+                            <p:commandButton value="Cerrar" actionListener="#{denominacionesEfectivoController.retirarEfectivo()}" icon="pi pi-times" class="White ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-g-3 ui-md-3 ui-lg-3" update=":form" immediate="true" />
+                        </div>
+                    </f:facet>
+                </p:card>
+            </p:fragment>
+            <p:dialog id="dialogConfirmacio" style="padding: 0px !important; top: auto;" responsive="true"
+                      header="Confirmación" showEffect="fade" modal="true" draggable="true" resizable="false" hideEffect="fade" 
+                      widgetVar="dialogConfirmacio" width="30%" height="50%">
+                <div class="ui-g-12 ui-md-12 ui-lg-12" style="text-align: center">
+                    <p:outputLabel value="#{denominacionesEfectivoController.view.mensaje}" style="font-size: 24px;color:red;font-weight: bold !important"/>
+                </div>
+                <div class="ui-g-12 ui-md-12 ui-lg-12">
+                    <p:commandButton value="Cerrar" onclick="PF('dialogConfirmacio').hide();PF('postulantes').hide();" icon="pi pi-times" class="White ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-g-12 ui-md-12 ui-lg-12" update=":form" immediate="true" />
+                </div>
+            </p:dialog>
+        </h:form>
+    </h:body>
+</html>
